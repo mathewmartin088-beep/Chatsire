@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#18202f;--muted:#5d6879;--paper:#edf0f5;--surface:#fff;--mist:#d9dfea;--cobalt:#2d4bff;--online:#1fa971}
+@media (prefers-color-scheme:dark){:root{--ink:#e8ecf5;--muted:#9aa5b8;--paper:#10141d;--surface:#181e2a;--mist:#2a3243;--cobalt:#4660ff}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.45 'Figtree',system-ui,sans-serif}
+#root{height:100dvh}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.brand{font:700 28px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
+
+/* join */
+.join{height:100%;display:grid;place-items:center;padding:24px}
+.join form{width:min(360px,100%);display:flex;flex-direction:column;gap:14px}
+.join p{margin:0;color:var(--muted)}
+.field{padding:12px 14px;border:1px solid var(--mist);border-radius:10px;background:var(--surface)}
+.btn{padding:12px 18px;border:0;border-radius:10px;background:var(--cobalt);color:#fff;font-weight:600;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.error{color:#c0332b;font-size:14px;margin:0}
+
+/* chat */
+.app{display:grid;grid-template-columns:260px 1fr;height:100%}
+.side{background:var(--surface);border-right:1px solid var(--mist);padding:20px 14px;display:flex;flex-direction:column;gap:26px;overflow-y:auto}
+.side h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px 10px}
+.room{display:block;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:8px;background:none;cursor:pointer}
+.room:hover{background:var(--paper)}
+.room[aria-current="true"]{background:var(--cobalt);color:#fff}
+.person{display:flex;align-items:center;gap:8px;padding:4px 10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--online);flex:none}
+.main{display:flex;flex-direction:column;min-width:0;height:100%}
+.head{padding:16px 24px;border-bottom:1px solid var(--mist);background:var(--surface)}
+.head h1{font:600 20px/1.2 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+.log{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:3px}
+.empty{margin:auto;color:var(--muted)}
+.msg{max-width:min(560px,82%);display:flex;flex-direction:column;align-items:flex-start}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.first{margin-top:14px}
+.meta{margin:0 4px 3px;font-size:13px;color:var(--muted)}
+.meta b{font-weight:600;color:var(--ink);margin-right:6px}
+.bubble{padding:9px 14px;border-radius:16px 16px 16px 4px;background:var(--surface);border:1px solid var(--mist);overflow-wrap:anywhere;white-space:pre-wrap}
+.me .bubble{background:var(--cobalt);color:#fff;border-color:transparent;border-radius:16px 16px 4px 16px}
+.status{height:26px;padding:0 24px;font-size:13px;color:var(--muted)}
+.composer{display:flex;gap:10px;padding:4px 24px 20px}
+.composer .field{flex:1;min-width:0}
+
+@media (max-width:720px){
+  .app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .side{flex-direction:row;align-items:center;padding:10px 12px;border-right:0;border-bottom:1px solid var(--mist);overflow-x:auto;gap:10px}
+  .side h2,.people{display:none}
+  .rooms{display:flex;gap:4px}
+  .room{width:auto;white-space:nowrap}
+  .head,.log,.status,.composer{padding-left:14px;padding-right:14px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const socket = io({ autoConnect: false });
+
+function JoinScreen({ onJoined }) {
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const submit = (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    if (!socket.connected) socket.connect();
+    socket.emit('join', { name, room: 'general' }, (res) => {
+      setBusy(false);
+      if (res.error) return setError(res.error);
+      onJoined(name.trim(), res);
+    });
+  };
+
+  return (
+    <main className="join">
+      <form onSubmit={submit}>
+        <h1 className="brand">Relay</h1>
+        <p>Pick a name and jump into the conversation.</p>
+        <input
+          className="field"
+          aria-label="Your name"
+          placeholder="Your name"
+          value={name}
+          maxLength={24}
+          autoFocus
+          onChange={(e) => setName(e.target.value)}
+        />
+        {error && <p className="error" role="alert">{error}</p>}
+        <button className="btn" disabled={busy || !name.trim()}>Join chat</button>
+      </form>
+    </main>
+  );
+}
+
+function Chat({ name, session }) {
+  const [room, setRoom] = useState(session.room);
+  const [messages, setMessages] = useState(session.history);
+  const [users, setUsers] = useState([name]);
+  const [typing, setTyping] = useState([]);
+  const [text, setText] = useState('');
+  const [connected, setConnected] = useState(true);
+  const roomRef = useRef(room);
+  const logRef = useRef(null);
+  const typingTimer = useRef(null);
+  roomRef.current = room;
+
+  useEffect(() => {
+    const onMessage = (m) => setMessages((prev) => [...prev, m]);
+    const onUsers = (list) => setUsers(list);
+    const onTyping = ({ name: n, isTyping }) =>
+      setTyping((prev) => (isTyping ? (prev.includes(n) ? prev : [...prev, n]) : prev.filter((x) => x !== n)));
+    const onConnect = () => {
+      setConnected(true);
+      socket.emit('join', { name, room: roomRef.current }, (res) => res.ok && setMessages(res.history));
+    };
+    const onDisconnect = () => setConnected(false);
+
+    socket.on('message', onMessage);
+    socket.on('users', onUsers);
+    socket.on('typing', onTyping);
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    return () => {
+      socket.off('message', onMessage);
+      socket.off('users', onUsers);
+      socket.off('typing', onTyping);
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+    };
+  }, [name]);
+
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages]);
+
+  const switchRoom = (r) => {
+    if (r === room) return;
+    socket.emit('join', { name, room: r }, (res) => {
+      if (!res.ok) return;
+      setRoom(r);
+      setMessages(res.history);
+      setTyping([]);
+    });
+  };
+
+  const onChange = (e) => {
+    setText(e.target.value);
+    socket.emit('typing', true);
+    clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => socket.emit('typing', false), 1500);
+  };
+
+  const send = (e) => {
+    e.preventDefault();
+    const t = text.trim();
+    if (!t) return;
+    socket.emit('message', t);
+    socket.emit('typing', false);
+    clearTimeout(typingTimer.current);
+    setText('');
+  };
+
+  const fmt = (ts) => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const typingLabel =
+    typing.length === 1 ? `${typing[0]} is typing…` : typing.length > 1 ? 'Several people are typing…' : '';
+
+  return (
+    <div className="app">
+      <aside className="side">
+        <h1 className="brand">Relay</h1>
+        <nav aria-label="Rooms">
+          <h2>Rooms</h2>
+          <div className="rooms">
+            {session.rooms.map((r) => (
+              <button key={r} className="room" aria-current={r === room} onClick={() => switchRoom(r)}>
+                {r}
+              </button>
+            ))}
+          </div>
+        </nav>
+        <section className="people">
+          <h2>In this room</h2>
+          {users.map((u) => (
+            <div className="person" key={u}>
+              <span className="dot" aria-hidden="true" />
+              {u}{u === name ? ' (you)' : ''}
+            </div>
+          ))}
+        </section>
+      </aside>
+
+      <main className="main">
+        <header className="head"><h1>{room}</h1></header>
+
+        <div className="log" ref={logRef} role="log" aria-live="polite">
+          {messages.length === 0 && <p className="empty">No messages in {room} yet. Say hello.</p>}
+          {messages.map((m, i) => {
+            const prev = messages[i - 1];
+            const first = !prev || prev.name !== m.name || m.ts - prev.ts > 5 * 60 * 1000;
+            const mine = m.name === name;
+            return (
+              <div key={m.id} className={`msg${mine ? ' me' : ''}${first ? ' first' : ''}`}>
+                {first && (
+                  <p className="meta">
+                    {!mine && <b>{m.name}</b>}
+                    <time dateTime={new Date(m.ts).toISOString()}>{fmt(m.ts)}</time>
+                  </p>
+                )}
+                <div className="bubble">{m.text}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="status" aria-live="polite">
+          {connected ? typingLabel : 'Connection lost. Reconnecting…'}
+        </div>
+
+        <form className="composer" onSubmit={send}>
+          <input
+            className="field"
+            aria-label="Message"
+            placeholder={`Message ${room}`}
+            value={text}
+            maxLength={2000}
+            onChange={onChange}
+            autoComplete="off"
+          />
+          <button className="btn" disabled={!text.trim() || !connected}>Send</button>
+        </form>
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  const [session, setSession] = useState(null);
+  if (!session) return <JoinScreen onJoined={(name, res) => setSession({ name, ...res })} />;
+  return <Chat name={session.name} session={session} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
