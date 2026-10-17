@@ -18,46 +18,56 @@ button,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
 .brand{font:700 28px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
 
-/* join */
-.join{height:100%;display:grid;place-items:center;padding:24px}
-.join form{width:min(360px,100%);display:flex;flex-direction:column;gap:14px}
-.join p{margin:0;color:var(--muted)}
-.field{padding:12px 14px;border:1px solid var(--mist);border-radius:10px;background:var(--surface)}
+.auth{height:100%;display:grid;place-items:center;padding:24px}
+.auth form{width:min(360px,100%);display:flex;flex-direction:column;gap:14px}
+.auth p{margin:0;color:var(--muted)}
+.field{padding:12px 14px;border:1px solid var(--mist);border-radius:10px;background:var(--surface);min-width:0}
 .btn{padding:12px 18px;border:0;border-radius:10px;background:var(--cobalt);color:#fff;font-weight:600;cursor:pointer}
 .btn:disabled{opacity:.5;cursor:default}
 .error{color:#c0332b;font-size:14px;margin:0}
+.link{background:none;border:0;padding:0;color:var(--cobalt);cursor:pointer;text-align:left;text-decoration:underline}
 
-/* chat */
-.app{display:grid;grid-template-columns:260px 1fr;height:100%}
-.side{background:var(--surface);border-right:1px solid var(--mist);padding:20px 14px;display:flex;flex-direction:column;gap:26px;overflow-y:auto}
+.app{display:grid;grid-template-columns:300px 1fr;height:100%}
+.side{background:var(--surface);border-right:1px solid var(--mist);padding:20px 14px;display:flex;flex-direction:column;gap:22px;overflow-y:auto}
 .side h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px 10px}
-.room{display:block;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:8px;background:none;cursor:pointer}
-.room:hover{background:var(--paper)}
-.room[aria-current="true"]{background:var(--cobalt);color:#fff}
-.person{display:flex;align-items:center;gap:8px;padding:4px 10px}
+.me{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 10px;font-size:14px;color:var(--muted)}
+.add{display:flex;gap:8px}
+.add .field{flex:1;padding:9px 12px}
+.note{font-size:13px;color:var(--muted);margin:6px 10px 0}
+.row{display:flex;align-items:center;gap:8px;padding:6px 10px;width:100%;border:0;border-radius:8px;background:none;text-align:left}
+button.row{cursor:pointer}
+button.row:hover{background:var(--paper)}
+.row[aria-current="true"]{background:var(--cobalt);color:#fff}
+.grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.acts{display:flex;gap:6px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--online);flex:none}
+.dot.off{background:var(--muted);opacity:.45}
+.badge{background:var(--cobalt);color:#fff;border-radius:999px;font-size:12px;padding:0 7px;min-width:20px;text-align:center}
+.sm{padding:5px 10px;border:1px solid var(--mist);border-radius:8px;background:none;cursor:pointer}
+.sm.go{background:var(--cobalt);color:#fff;border-color:transparent}
+
 .main{display:flex;flex-direction:column;min-width:0;height:100%}
-.head{padding:16px 24px;border-bottom:1px solid var(--mist);background:var(--surface)}
+.empty{margin:auto;padding:24px;color:var(--muted);text-align:center}
+.head{padding:14px 24px;border-bottom:1px solid var(--mist);background:var(--surface);display:flex;align-items:center;gap:12px}
 .head h1{font:600 20px/1.2 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+.sub{font-size:13px;color:var(--muted)}
+.push{margin-left:auto}
+.back{display:none}
 .log{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:3px}
-.empty{margin:auto;color:var(--muted)}
 .msg{max-width:min(560px,82%);display:flex;flex-direction:column;align-items:flex-start}
 .msg.me{align-self:flex-end;align-items:flex-end}
 .msg.first{margin-top:14px}
 .meta{margin:0 4px 3px;font-size:13px;color:var(--muted)}
-.meta b{font-weight:600;color:var(--ink);margin-right:6px}
 .bubble{padding:9px 14px;border-radius:16px 16px 16px 4px;background:var(--surface);border:1px solid var(--mist);overflow-wrap:anywhere;white-space:pre-wrap}
 .me .bubble{background:var(--cobalt);color:#fff;border-color:transparent;border-radius:16px 16px 4px 16px}
 .status{height:26px;padding:0 24px;font-size:13px;color:var(--muted)}
 .composer{display:flex;gap:10px;padding:4px 24px 20px}
-.composer .field{flex:1;min-width:0}
+.composer .field{flex:1}
 
 @media (max-width:720px){
-  .app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
-  .side{flex-direction:row;align-items:center;padding:10px 12px;border-right:0;border-bottom:1px solid var(--mist);overflow-x:auto;gap:10px}
-  .side h2,.people{display:none}
-  .rooms{display:flex;gap:4px}
-  .room{width:auto;white-space:nowrap}
+  .app{grid-template-columns:1fr}
+  .app.chatting .side,.app:not(.chatting) .main{display:none}
+  .back{display:inline-block}
   .head,.log,.status,.composer{padding-left:14px;padding-right:14px}
 }
 </style>
@@ -72,192 +82,268 @@ button,input{font:inherit;color:inherit}
 
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
-const socket = io({ autoConnect: false });
+const k = (n) => String(n || '').toLowerCase();
+const fmt = (ts) => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
-function JoinScreen({ onJoined }) {
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again.');
+  return data;
+}
+
+function AuthScreen({ onAuth }) {
+  const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const signup = mode === 'signup';
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
     setError('');
-    if (!socket.connected) socket.connect();
-    socket.emit('join', { name, room: 'general' }, (res) => {
+    try {
+      onAuth(await api(signup ? '/api/register' : '/api/login', { name, password }));
+    } catch (err) {
+      setError(err.message);
       setBusy(false);
-      if (res.error) return setError(res.error);
-      onJoined(name.trim(), res);
-    });
+    }
   };
 
   return (
-    <main className="join">
+    <main className="auth">
       <form onSubmit={submit}>
         <h1 className="brand">Relay</h1>
-        <p>Pick a name and jump into the conversation.</p>
-        <input
-          className="field"
-          aria-label="Your name"
-          placeholder="Your name"
-          value={name}
-          maxLength={24}
-          autoFocus
-          onChange={(e) => setName(e.target.value)}
-        />
+        <p>{signup ? 'Create an account to chat with your friends.' : 'Log in to chat with your friends.'}</p>
+        <input className="field" aria-label="Username" placeholder="Username" value={name}
+          maxLength={20} autoFocus autoComplete="username" onChange={(e) => setName(e.target.value)} />
+        <input className="field" type="password" aria-label="Password" placeholder="Password" value={password}
+          autoComplete={signup ? 'new-password' : 'current-password'} onChange={(e) => setPassword(e.target.value)} />
         {error && <p className="error" role="alert">{error}</p>}
-        <button className="btn" disabled={busy || !name.trim()}>Join chat</button>
+        <button className="btn" disabled={busy || !name.trim() || !password}>
+          {signup ? 'Create account' : 'Log in'}
+        </button>
+        <button type="button" className="link" onClick={() => { setMode(signup ? 'login' : 'signup'); setError(''); }}>
+          {signup ? 'Have an account? Log in' : 'New here? Create an account'}
+        </button>
       </form>
     </main>
   );
 }
 
-function Chat({ name, session }) {
-  const [room, setRoom] = useState(session.room);
-  const [messages, setMessages] = useState(session.history);
-  const [users, setUsers] = useState([name]);
-  const [typing, setTyping] = useState([]);
+function Chat({ auth, onLogout }) {
+  const [sock, setSock] = useState(null);
+  const [state, setState] = useState({ friends: [], incoming: [], outgoing: [] });
+  const [active, setActive] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [unread, setUnread] = useState({});
+  const [typingFrom, setTypingFrom] = useState({});
+  const [connected, setConnected] = useState(false);
   const [text, setText] = useState('');
-  const [connected, setConnected] = useState(true);
-  const roomRef = useRef(room);
+  const [addName, setAddName] = useState('');
+  const [addNote, setAddNote] = useState({ text: '', error: false });
+  const activeRef = useRef(null);
   const logRef = useRef(null);
   const typingTimer = useRef(null);
-  roomRef.current = room;
+  activeRef.current = active;
 
   useEffect(() => {
-    const onMessage = (m) => setMessages((prev) => [...prev, m]);
-    const onUsers = (list) => setUsers(list);
-    const onTyping = ({ name: n, isTyping }) =>
-      setTyping((prev) => (isTyping ? (prev.includes(n) ? prev : [...prev, n]) : prev.filter((x) => x !== n)));
-    const onConnect = () => {
+    const s = io({ auth: { token: auth.token } });
+    setSock(s);
+    s.on('connect', () => {
       setConnected(true);
-      socket.emit('join', { name, room: roomRef.current }, (res) => res.ok && setMessages(res.history));
-    };
-    const onDisconnect = () => setConnected(false);
+      const a = activeRef.current;
+      if (a) s.emit('history', a, (r) => r.ok && setMessages(r.history));
+    });
+    s.on('disconnect', () => setConnected(false));
+    s.on('connect_error', (err) => err.message === 'auth' && onLogout());
+    s.on('state', setState);
+    s.on('typing', ({ from, isTyping }) => setTypingFrom((t) => ({ ...t, [k(from)]: isTyping })));
+    s.on('message', (m) => {
+      const mine = k(m.from) === k(auth.name);
+      const other = mine ? m.to : m.from;
+      if (activeRef.current && k(activeRef.current) === k(other)) setMessages((p) => [...p, m]);
+      else if (!mine) setUnread((u) => ({ ...u, [k(other)]: (u[k(other)] || 0) + 1 }));
+    });
+    return () => s.disconnect();
+  }, [auth.token]);
 
-    socket.on('message', onMessage);
-    socket.on('users', onUsers);
-    socket.on('typing', onTyping);
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    return () => {
-      socket.off('message', onMessage);
-      socket.off('users', onUsers);
-      socket.off('typing', onTyping);
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, [name]);
+  useEffect(() => {
+    if (active && !state.friends.some((f) => k(f.name) === k(active))) setActive(null);
+  }, [state.friends, active]);
 
   useEffect(() => {
     const el = logRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages]);
+  }, [messages, active]);
 
-  const switchRoom = (r) => {
-    if (r === room) return;
-    socket.emit('join', { name, room: r }, (res) => {
-      if (!res.ok) return;
-      setRoom(r);
-      setMessages(res.history);
-      setTyping([]);
+  const open = (name) => {
+    setActive(name);
+    setMessages([]);
+    setUnread((u) => ({ ...u, [k(name)]: 0 }));
+    sock.emit('history', name, (r) => {
+      if (r.ok && k(activeRef.current) === k(name)) setMessages(r.history);
     });
+  };
+
+  const addFriend = (e) => {
+    e.preventDefault();
+    const n = addName.trim();
+    if (!n) return;
+    sock.emit('friend:request', n, (res) => {
+      setAddNote({ text: res.error || res.message, error: !!res.error });
+      if (!res.error) setAddName('');
+    });
+  };
+
+  const removeFriend = () => {
+    if (window.confirm(`Remove ${active} from your friends? Your chat history will be deleted.`))
+      sock.emit('friend:remove', active);
   };
 
   const onChange = (e) => {
     setText(e.target.value);
-    socket.emit('typing', true);
+    sock.emit('typing', { to: active, isTyping: true });
     clearTimeout(typingTimer.current);
-    typingTimer.current = setTimeout(() => socket.emit('typing', false), 1500);
+    typingTimer.current = setTimeout(() => sock.emit('typing', { to: active, isTyping: false }), 1500);
   };
 
   const send = (e) => {
     e.preventDefault();
     const t = text.trim();
     if (!t) return;
-    socket.emit('message', t);
-    socket.emit('typing', false);
+    sock.emit('message', { to: active, text: t });
+    sock.emit('typing', { to: active, isTyping: false });
     clearTimeout(typingTimer.current);
     setText('');
   };
 
-  const fmt = (ts) => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  const typingLabel =
-    typing.length === 1 ? `${typing[0]} is typing…` : typing.length > 1 ? 'Several people are typing…' : '';
+  const friend = state.friends.find((f) => k(f.name) === k(active));
 
   return (
-    <div className="app">
+    <div className={`app${active ? ' chatting' : ''}`}>
       <aside className="side">
-        <h1 className="brand">Relay</h1>
-        <nav aria-label="Rooms">
-          <h2>Rooms</h2>
-          <div className="rooms">
-            {session.rooms.map((r) => (
-              <button key={r} className="room" aria-current={r === room} onClick={() => switchRoom(r)}>
-                {r}
-              </button>
+        <div>
+          <h1 className="brand">Relay</h1>
+        </div>
+        <div className="me">
+          <span className="grow">Signed in as {auth.name}</span>
+          <button className="link" onClick={onLogout}>Log out</button>
+        </div>
+
+        <section>
+          <h2>Add a friend</h2>
+          <form className="add" onSubmit={addFriend}>
+            <input className="field" aria-label="Friend’s username" placeholder="Their username"
+              value={addName} onChange={(e) => { setAddName(e.target.value); setAddNote({ text: '', error: false }); }} />
+            <button className="sm go" disabled={!addName.trim()}>Add</button>
+          </form>
+          {addNote.text && <p className={`note${addNote.error ? ' error' : ''}`} role="status">{addNote.text}</p>}
+        </section>
+
+        {(state.incoming.length > 0 || state.outgoing.length > 0) && (
+          <section>
+            <h2>Requests</h2>
+            {state.incoming.map((n) => (
+              <div className="row" key={n}>
+                <span className="grow">{n}</span>
+                <span className="acts">
+                  <button className="sm go" onClick={() => sock.emit('friend:accept', n)}>Accept</button>
+                  <button className="sm" onClick={() => sock.emit('friend:decline', n)}>Decline</button>
+                </span>
+              </div>
             ))}
-          </div>
-        </nav>
-        <section className="people">
-          <h2>In this room</h2>
-          {users.map((u) => (
-            <div className="person" key={u}>
-              <span className="dot" aria-hidden="true" />
-              {u}{u === name ? ' (you)' : ''}
-            </div>
+            {state.outgoing.map((n) => (
+              <div className="row" key={n}>
+                <span className="grow">{n}</span>
+                <span className="sub">Waiting for reply</span>
+              </div>
+            ))}
+          </section>
+        )}
+
+        <section>
+          <h2>Friends</h2>
+          {state.friends.length === 0 && <p className="note">No friends yet. Add someone by their username.</p>}
+          {state.friends.map((f) => (
+            <button key={f.name} className="row" aria-current={k(f.name) === k(active)} onClick={() => open(f.name)}>
+              <span className={`dot${f.online ? '' : ' off'}`} aria-hidden="true" />
+              <span className="grow">{f.name}</span>
+              {unread[k(f.name)] > 0 && <span className="badge">{unread[k(f.name)]}</span>}
+            </button>
           ))}
         </section>
       </aside>
 
       <main className="main">
-        <header className="head"><h1>{room}</h1></header>
-
-        <div className="log" ref={logRef} role="log" aria-live="polite">
-          {messages.length === 0 && <p className="empty">No messages in {room} yet. Say hello.</p>}
-          {messages.map((m, i) => {
-            const prev = messages[i - 1];
-            const first = !prev || prev.name !== m.name || m.ts - prev.ts > 5 * 60 * 1000;
-            const mine = m.name === name;
-            return (
-              <div key={m.id} className={`msg${mine ? ' me' : ''}${first ? ' first' : ''}`}>
-                {first && (
-                  <p className="meta">
-                    {!mine && <b>{m.name}</b>}
-                    <time dateTime={new Date(m.ts).toISOString()}>{fmt(m.ts)}</time>
-                  </p>
-                )}
-                <div className="bubble">{m.text}</div>
+        {!active ? (
+          <p className="empty">Pick a friend to start chatting, or add one by their username.</p>
+        ) : (
+          <>
+            <header className="head">
+              <button className="sm back" onClick={() => setActive(null)}>Back</button>
+              <div>
+                <h1>{active}</h1>
+                <span className="sub">{friend?.online ? 'Online' : 'Offline'}</span>
               </div>
-            );
-          })}
-        </div>
+              <button className="sm push" onClick={removeFriend}>Remove friend</button>
+            </header>
 
-        <div className="status" aria-live="polite">
-          {connected ? typingLabel : 'Connection lost. Reconnecting…'}
-        </div>
+            <div className="log" ref={logRef} role="log" aria-live="polite">
+              {messages.length === 0 && <p className="empty">No messages yet. Say hello to {active}.</p>}
+              {messages.map((m, i) => {
+                const prev = messages[i - 1];
+                const first = !prev || prev.from !== m.from || m.ts - prev.ts > 5 * 60 * 1000;
+                const mine = k(m.from) === k(auth.name);
+                return (
+                  <div key={m.id} className={`msg${mine ? ' me' : ''}${first ? ' first' : ''}`}>
+                    {first && <p className="meta"><time dateTime={new Date(m.ts).toISOString()}>{fmt(m.ts)}</time></p>}
+                    <div className="bubble">{m.text}</div>
+                  </div>
+                );
+              })}
+            </div>
 
-        <form className="composer" onSubmit={send}>
-          <input
-            className="field"
-            aria-label="Message"
-            placeholder={`Message ${room}`}
-            value={text}
-            maxLength={2000}
-            onChange={onChange}
-            autoComplete="off"
-          />
-          <button className="btn" disabled={!text.trim() || !connected}>Send</button>
-        </form>
+            <div className="status" aria-live="polite">
+              {!connected ? 'Connection lost. Reconnecting…' : typingFrom[k(active)] ? `${active} is typing…` : ''}
+            </div>
+
+            <form className="composer" onSubmit={send}>
+              <input className="field" aria-label="Message" placeholder={`Message ${active}`} value={text}
+                maxLength={2000} autoComplete="off" onChange={onChange} />
+              <button className="btn" disabled={!text.trim() || !connected}>Send</button>
+            </form>
+          </>
+        )}
       </main>
     </div>
   );
 }
 
 function App() {
-  const [session, setSession] = useState(null);
-  if (!session) return <JoinScreen onJoined={(name, res) => setSession({ name, ...res })} />;
-  return <Chat name={session.name} session={session} />;
+  const [auth, setAuth] = useState(() => {
+    const token = localStorage.getItem('relay.token');
+    const name = localStorage.getItem('relay.name');
+    return token && name ? { token, name } : null;
+  });
+  const login = (data) => {
+    localStorage.setItem('relay.token', data.token);
+    localStorage.setItem('relay.name', data.name);
+    setAuth({ token: data.token, name: data.name });
+  };
+  const logout = () => {
+    if (auth) api('/api/logout', { token: auth.token }).catch(() => {});
+    localStorage.removeItem('relay.token');
+    localStorage.removeItem('relay.name');
+    setAuth(null);
+  };
+  return auth ? <Chat auth={auth} onLogout={logout} /> : <AuthScreen onAuth={login} />;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
