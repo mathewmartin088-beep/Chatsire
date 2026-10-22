@@ -1,13 +1,13 @@
 {
-  "name": "relay-messenger",
+  "name": "chatsire",
   "version": "1.0.0",
-  "description": "Real-time messaging app: React frontend, Node.js + Socket.IO backend",
+  "description": "A platform built for Minecraft!",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "socket.io": "^4.8.1"
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7"
   }
 }
