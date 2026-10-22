@@ -2,20 +2,23 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
+// Create local data directory inside project folder to ensure write permissions
 const dbDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
 const dbPath = path.join(dbDir, 'users.db');
+
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('Failed to open database:', err.message);
+    console.error('Failed to open SQLite database:', err.message);
   } else {
     console.log('Connected to SQLite database at:', dbPath);
   }
 });
 
+// Create users table if it does not exist
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
