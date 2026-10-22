@@ -5,16 +5,28 @@ const db = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Body parsing middleware
+// Body parsing middleware (handles both JSON and form submissions)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from public/
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Account Registration (supports both /register and /api/register)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Helper function to extract credentials reliably
+function getCredentials(req) {
+  const body = req.body || {};
+  const username = (body.username || body.user || body.uname || '').toString().trim();
+  const password = (body.password || body.pass || body.passwd || '').toString().trim();
+  return { username, password };
+}
+
+// Registration handler
 const handleRegister = (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = getCredentials(req);
 
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required.' });
@@ -25,18 +37,23 @@ const handleRegister = (req, res) => {
       if (err.message && err.message.includes('UNIQUE constraint failed')) {
         return res.status(400).json({ error: 'Username is already taken.' });
       }
-      return res.status(500).json({ error: 'Database error occurred.' });
+      return res.status(500).json({ error: 'Failed to create account.' });
     }
-    return res.status(200).json({ message: 'Account created successfully! You can now log in.', user });
+
+    console.log(`User registered: ${user.username}`);
+    return res.status(200).json({
+      message: 'Account created successfully! You can now log in.',
+      user: { username: user.username }
+    });
   });
 };
 
 app.post('/register', handleRegister);
 app.post('/api/register', handleRegister);
 
-// User Login (supports both /login and /api/login)
+// Login handler
 const handleLogin = (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = getCredentials(req);
 
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required.' });
@@ -46,7 +63,12 @@ const handleLogin = (req, res) => {
     if (err || !user || user.password !== password) {
       return res.status(401).json({ error: 'Invalid username or password.' });
     }
-    return res.status(200).json({ message: `Welcome back, ${user.username}!`, user: { id: user.id, username: user.username } });
+
+    console.log(`User logged in: ${user.username}`);
+    return res.status(200).json({
+      message: `Welcome back, ${user.username}!`,
+      user: { id: user.id, username: user.username }
+    });
   });
 };
 
