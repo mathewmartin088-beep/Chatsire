@@ -1,352 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Relay</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{--ink:#18202f;--muted:#5d6879;--paper:#edf0f5;--surface:#fff;--mist:#d9dfea;--cobalt:#2d4bff;--online:#1fa971}
-@media (prefers-color-scheme:dark){:root{--ink:#e8ecf5;--muted:#9aa5b8;--paper:#10141d;--surface:#181e2a;--mist:#2a3243;--cobalt:#4660ff}}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--paper);color:var(--ink);font:16px/1.45 'Figtree',system-ui,sans-serif}
-#root{height:100dvh}
-button,input{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
-.brand{font:700 28px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
-
-.auth{height:100%;display:grid;place-items:center;padding:24px}
-.auth form{width:min(360px,100%);display:flex;flex-direction:column;gap:14px}
-.auth p{margin:0;color:var(--muted)}
-.field{padding:12px 14px;border:1px solid var(--mist);border-radius:10px;background:var(--surface);min-width:0}
-.btn{padding:12px 18px;border:0;border-radius:10px;background:var(--cobalt);color:#fff;font-weight:600;cursor:pointer}
-.btn:disabled{opacity:.5;cursor:default}
-.error{color:#c0332b;font-size:14px;margin:0}
-.link{background:none;border:0;padding:0;color:var(--cobalt);cursor:pointer;text-align:left;text-decoration:underline}
-
-.app{display:grid;grid-template-columns:300px 1fr;height:100%}
-.side{background:var(--surface);border-right:1px solid var(--mist);padding:20px 14px;display:flex;flex-direction:column;gap:22px;overflow-y:auto}
-.side h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px 10px}
-.me{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 10px;font-size:14px;color:var(--muted)}
-.add{display:flex;gap:8px}
-.add .field{flex:1;padding:9px 12px}
-.note{font-size:13px;color:var(--muted);margin:6px 10px 0}
-.row{display:flex;align-items:center;gap:8px;padding:6px 10px;width:100%;border:0;border-radius:8px;background:none;text-align:left}
-button.row{cursor:pointer}
-button.row:hover{background:var(--paper)}
-.row[aria-current="true"]{background:var(--cobalt);color:#fff}
-.grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.acts{display:flex;gap:6px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--online);flex:none}
-.dot.off{background:var(--muted);opacity:.45}
-.badge{background:var(--cobalt);color:#fff;border-radius:999px;font-size:12px;padding:0 7px;min-width:20px;text-align:center}
-.sm{padding:5px 10px;border:1px solid var(--mist);border-radius:8px;background:none;cursor:pointer}
-.sm.go{background:var(--cobalt);color:#fff;border-color:transparent}
-
-.main{display:flex;flex-direction:column;min-width:0;height:100%}
-.empty{margin:auto;padding:24px;color:var(--muted);text-align:center}
-.head{padding:14px 24px;border-bottom:1px solid var(--mist);background:var(--surface);display:flex;align-items:center;gap:12px}
-.head h1{font:600 20px/1.2 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
-.sub{font-size:13px;color:var(--muted)}
-.push{margin-left:auto}
-.back{display:none}
-.log{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:3px}
-.msg{max-width:min(560px,82%);display:flex;flex-direction:column;align-items:flex-start}
-.msg.me{align-self:flex-end;align-items:flex-end}
-.msg.first{margin-top:14px}
-.meta{margin:0 4px 3px;font-size:13px;color:var(--muted)}
-.bubble{padding:9px 14px;border-radius:16px 16px 16px 4px;background:var(--surface);border:1px solid var(--mist);overflow-wrap:anywhere;white-space:pre-wrap}
-.me .bubble{background:var(--cobalt);color:#fff;border-color:transparent;border-radius:16px 16px 4px 16px}
-.status{height:26px;padding:0 24px;font-size:13px;color:var(--muted)}
-.composer{display:flex;gap:10px;padding:4px 24px 20px}
-.composer .field{flex:1}
-
-@media (max-width:720px){
-  .app{grid-template-columns:1fr}
-  .app.chatting .side,.app:not(.chatting) .main{display:none}
-  .back{display:inline-block}
-  .head,.log,.status,.composer{padding-left:14px;padding-right:14px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relay - Chatsire</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 380px;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      color: #5865f2;
+    }
+    p {
+      color: #b9bbbe;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input {
+      padding: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid #333;
+      background: #2b2b2b;
+      color: #fff;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #5865f2;
+    }
+    button {
+      padding: 0.75rem;
+      border-radius: 4px;
+      border: none;
+      background: #5865f2;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #4752c4;
+    }
+    .toggle {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+      color: #b9bbbe;
+    }
+    .toggle-link {
+      color: #5865f2;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .message {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 4px;
+      display: none;
+    }
+    .error {
+      display: block;
+      background: rgba(240, 71, 71, 0.2);
+      color: #f04747;
+      border: 1px solid #f04747;
+    }
+    .success {
+      display: block;
+      background: rgba(67, 181, 129, 0.2);
+      color: #43b581;
+      border: 1px solid #43b581;
+    }
+  </style>
 </head>
 <body>
-<div id="root"></div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+  <div class="card">
+    <h1 id="title">Relay</h1>
+    <p id="subtitle">Create an account to chat with your friends.</p>
 
-<script type="text/babel">
-const { useState, useEffect, useRef } = React;
-const k = (n) => String(n || '').toLowerCase();
-const fmt = (ts) => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    <form id="auth-form">
+      <input type="text" id="username" name="username" placeholder="Username" required autocomplete="username" />
+      <input type="password" id="password" name="password" placeholder="Password" required autocomplete="current-password" />
+      <button type="submit" id="submit-btn">Create account</button>
+    </form>
 
-async function api(path, body) {
-  const res = await fetch(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Something went wrong. Try again.');
-  return data;
-}
-
-function AuthScreen({ onAuth }) {
-  const [mode, setMode] = useState('login');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const signup = mode === 'signup';
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    setError('');
-    try {
-      onAuth(await api(signup ? '/api/register' : '/api/login', { name, password }));
-    } catch (err) {
-      setError(err.message);
-      setBusy(false);
-    }
-  };
-
-  return (
-    <main className="auth">
-      <form onSubmit={submit}>
-        <h1 className="brand">Relay</h1>
-        <p>{signup ? 'Create an account to chat with your friends.' : 'Log in to chat with your friends.'}</p>
-        <input className="field" aria-label="Username" placeholder="Username" value={name}
-          maxLength={20} autoFocus autoComplete="username" onChange={(e) => setName(e.target.value)} />
-        <input className="field" type="password" aria-label="Password" placeholder="Password" value={password}
-          autoComplete={signup ? 'new-password' : 'current-password'} onChange={(e) => setPassword(e.target.value)} />
-        {error && <p className="error" role="alert">{error}</p>}
-        <button className="btn" disabled={busy || !name.trim() || !password}>
-          {signup ? 'Create account' : 'Log in'}
-        </button>
-        <button type="button" className="link" onClick={() => { setMode(signup ? 'login' : 'signup'); setError(''); }}>
-          {signup ? 'Have an account? Log in' : 'New here? Create an account'}
-        </button>
-      </form>
-    </main>
-  );
-}
-
-function Chat({ auth, onLogout }) {
-  const [sock, setSock] = useState(null);
-  const [state, setState] = useState({ friends: [], incoming: [], outgoing: [] });
-  const [active, setActive] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [unread, setUnread] = useState({});
-  const [typingFrom, setTypingFrom] = useState({});
-  const [connected, setConnected] = useState(false);
-  const [text, setText] = useState('');
-  const [addName, setAddName] = useState('');
-  const [addNote, setAddNote] = useState({ text: '', error: false });
-  const activeRef = useRef(null);
-  const logRef = useRef(null);
-  const typingTimer = useRef(null);
-  activeRef.current = active;
-
-  useEffect(() => {
-    const s = io({ auth: { token: auth.token } });
-    setSock(s);
-    s.on('connect', () => {
-      setConnected(true);
-      const a = activeRef.current;
-      if (a) s.emit('history', a, (r) => r.ok && setMessages(r.history));
-    });
-    s.on('disconnect', () => setConnected(false));
-    s.on('connect_error', (err) => err.message === 'auth' && onLogout());
-    s.on('state', setState);
-    s.on('typing', ({ from, isTyping }) => setTypingFrom((t) => ({ ...t, [k(from)]: isTyping })));
-    s.on('message', (m) => {
-      const mine = k(m.from) === k(auth.name);
-      const other = mine ? m.to : m.from;
-      if (activeRef.current && k(activeRef.current) === k(other)) setMessages((p) => [...p, m]);
-      else if (!mine) setUnread((u) => ({ ...u, [k(other)]: (u[k(other)] || 0) + 1 }));
-    });
-    return () => s.disconnect();
-  }, [auth.token]);
-
-  useEffect(() => {
-    if (active && !state.friends.some((f) => k(f.name) === k(active))) setActive(null);
-  }, [state.friends, active]);
-
-  useEffect(() => {
-    const el = logRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, active]);
-
-  const open = (name) => {
-    setActive(name);
-    setMessages([]);
-    setUnread((u) => ({ ...u, [k(name)]: 0 }));
-    sock.emit('history', name, (r) => {
-      if (r.ok && k(activeRef.current) === k(name)) setMessages(r.history);
-    });
-  };
-
-  const addFriend = (e) => {
-    e.preventDefault();
-    const n = addName.trim();
-    if (!n) return;
-    sock.emit('friend:request', n, (res) => {
-      setAddNote({ text: res.error || res.message, error: !!res.error });
-      if (!res.error) setAddName('');
-    });
-  };
-
-  const removeFriend = () => {
-    if (window.confirm(`Remove ${active} from your friends? Your chat history will be deleted.`))
-      sock.emit('friend:remove', active);
-  };
-
-  const onChange = (e) => {
-    setText(e.target.value);
-    sock.emit('typing', { to: active, isTyping: true });
-    clearTimeout(typingTimer.current);
-    typingTimer.current = setTimeout(() => sock.emit('typing', { to: active, isTyping: false }), 1500);
-  };
-
-  const send = (e) => {
-    e.preventDefault();
-    const t = text.trim();
-    if (!t) return;
-    sock.emit('message', { to: active, text: t });
-    sock.emit('typing', { to: active, isTyping: false });
-    clearTimeout(typingTimer.current);
-    setText('');
-  };
-
-  const friend = state.friends.find((f) => k(f.name) === k(active));
-
-  return (
-    <div className={`app${active ? ' chatting' : ''}`}>
-      <aside className="side">
-        <div>
-          <h1 className="brand">Relay</h1>
-        </div>
-        <div className="me">
-          <span className="grow">Signed in as {auth.name}</span>
-          <button className="link" onClick={onLogout}>Log out</button>
-        </div>
-
-        <section>
-          <h2>Add a friend</h2>
-          <form className="add" onSubmit={addFriend}>
-            <input className="field" aria-label="Friend’s username" placeholder="Their username"
-              value={addName} onChange={(e) => { setAddName(e.target.value); setAddNote({ text: '', error: false }); }} />
-            <button className="sm go" disabled={!addName.trim()}>Add</button>
-          </form>
-          {addNote.text && <p className={`note${addNote.error ? ' error' : ''}`} role="status">{addNote.text}</p>}
-        </section>
-
-        {(state.incoming.length > 0 || state.outgoing.length > 0) && (
-          <section>
-            <h2>Requests</h2>
-            {state.incoming.map((n) => (
-              <div className="row" key={n}>
-                <span className="grow">{n}</span>
-                <span className="acts">
-                  <button className="sm go" onClick={() => sock.emit('friend:accept', n)}>Accept</button>
-                  <button className="sm" onClick={() => sock.emit('friend:decline', n)}>Decline</button>
-                </span>
-              </div>
-            ))}
-            {state.outgoing.map((n) => (
-              <div className="row" key={n}>
-                <span className="grow">{n}</span>
-                <span className="sub">Waiting for reply</span>
-              </div>
-            ))}
-          </section>
-        )}
-
-        <section>
-          <h2>Friends</h2>
-          {state.friends.length === 0 && <p className="note">No friends yet. Add someone by their username.</p>}
-          {state.friends.map((f) => (
-            <button key={f.name} className="row" aria-current={k(f.name) === k(active)} onClick={() => open(f.name)}>
-              <span className={`dot${f.online ? '' : ' off'}`} aria-hidden="true" />
-              <span className="grow">{f.name}</span>
-              {unread[k(f.name)] > 0 && <span className="badge">{unread[k(f.name)]}</span>}
-            </button>
-          ))}
-        </section>
-      </aside>
-
-      <main className="main">
-        {!active ? (
-          <p className="empty">Pick a friend to start chatting, or add one by their username.</p>
-        ) : (
-          <>
-            <header className="head">
-              <button className="sm back" onClick={() => setActive(null)}>Back</button>
-              <div>
-                <h1>{active}</h1>
-                <span className="sub">{friend?.online ? 'Online' : 'Offline'}</span>
-              </div>
-              <button className="sm push" onClick={removeFriend}>Remove friend</button>
-            </header>
-
-            <div className="log" ref={logRef} role="log" aria-live="polite">
-              {messages.length === 0 && <p className="empty">No messages yet. Say hello to {active}.</p>}
-              {messages.map((m, i) => {
-                const prev = messages[i - 1];
-                const first = !prev || prev.from !== m.from || m.ts - prev.ts > 5 * 60 * 1000;
-                const mine = k(m.from) === k(auth.name);
-                return (
-                  <div key={m.id} className={`msg${mine ? ' me' : ''}${first ? ' first' : ''}`}>
-                    {first && <p className="meta"><time dateTime={new Date(m.ts).toISOString()}>{fmt(m.ts)}</time></p>}
-                    <div className="bubble">{m.text}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="status" aria-live="polite">
-              {!connected ? 'Connection lost. Reconnecting…' : typingFrom[k(active)] ? `${active} is typing…` : ''}
-            </div>
-
-            <form className="composer" onSubmit={send}>
-              <input className="field" aria-label="Message" placeholder={`Message ${active}`} value={text}
-                maxLength={2000} autoComplete="off" onChange={onChange} />
-              <button className="btn" disabled={!text.trim() || !connected}>Send</button>
-            </form>
-          </>
-        )}
-      </main>
+    <div class="toggle" id="toggle-container">
+      Have an account? <span class="toggle-link" id="toggle-btn">Log in</span>
     </div>
-  );
-}
 
-function App() {
-  const [auth, setAuth] = useState(() => {
-    const token = localStorage.getItem('relay.token');
-    const name = localStorage.getItem('relay.name');
-    return token && name ? { token, name } : null;
-  });
-  const login = (data) => {
-    localStorage.setItem('relay.token', data.token);
-    localStorage.setItem('relay.name', data.name);
-    setAuth({ token: data.token, name: data.name });
-  };
-  const logout = () => {
-    if (auth) api('/api/logout', { token: auth.token }).catch(() => {});
-    localStorage.removeItem('relay.token');
-    localStorage.removeItem('relay.name');
-    setAuth(null);
-  };
-  return auth ? <Chat auth={auth} onLogout={logout} /> : <AuthScreen onAuth={login} />;
-}
+    <div class="message" id="message"></div>
+  </div>
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+  <script>
+    let isSignUp = true;
+
+    const subtitle = document.getElementById('subtitle');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggleContainer = document.getElementById('toggle-container');
+    const authForm = document.getElementById('auth-form');
+    const messageDiv = document.getElementById('message');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    function setupToggleListener() {
+      const toggleBtn = document.getElementById('toggle-btn');
+      if (!toggleBtn) return;
+      toggleBtn.onclick = function() {
+        isSignUp = !isSignUp;
+        messageDiv.style.display = 'none';
+        messageDiv.textContent = '';
+        if (isSignUp) {
+          subtitle.textContent = 'Create an account to chat with your friends.';
+          submitBtn.textContent = 'Create account';
+          toggleContainer.innerHTML = 'Have an account? <span class="toggle-link" id="toggle-btn">Log in</span>';
+        } else {
+          subtitle.textContent = 'Welcome back! Log in to start chatting.';
+          submitBtn.textContent = 'Log in';
+          toggleContainer.innerHTML = 'Need an account? <span class="toggle-link" id="toggle-btn">Register</span>';
+        }
+        setupToggleListener();
+      };
+    }
+    setupToggleListener();
+
+    authForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      messageDiv.style.display = 'none';
+      messageDiv.textContent = '';
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!username || !password) {
+        messageDiv.className = 'message error';
+        messageDiv.textContent = 'Please enter both username and password.';
+        return;
+      }
+
+      const endpoint = isSignUp ? '/register' : '/login';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username: username, password: password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messageDiv.className = 'message success';
+          messageDiv.textContent = data.message || 'Success!';
+          if (isSignUp) {
+            authForm.reset();
+          }
+        } else {
+          messageDiv.className = 'message error';
+          messageDiv.textContent = data.error || 'An error occurred.';
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        messageDiv.className = 'message error';
+        messageDiv.textContent = 'Server connection failed. Please try again.';
+      }
+    });
+  </script>
 </body>
 </html>
